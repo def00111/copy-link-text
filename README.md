@@ -1,2 +1,2 @@
-# copy-link-text
+# Copy Link Text
  Copy the text of the link. 
