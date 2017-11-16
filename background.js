@@ -11,9 +11,9 @@ function notify(message) {
   });
 }
 
-let doCopy = String(str => {
+let doCopy = String(text => {
   document.addEventListener("copy", evt => {
-    evt.clipboardData.setData("text", str);
+    evt.clipboardData.setData("text", text);
     evt.preventDefault();
   }, {
     capture: true,
@@ -24,8 +24,9 @@ let doCopy = String(str => {
 
 contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId == "copy-link-text") {
+    let text = info.linkText.replace(/\\/g, "\\\\");
     tabs.executeScript(tab.id, {
-      code: `(${doCopy})("${info.linkText}");`
+      code: `(${doCopy})("${text}");`
     }).catch(error => {
       console.error(error)
       notify("Failed to copy the text.");
