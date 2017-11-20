@@ -11,24 +11,12 @@ function notify(message) {
   });
 }
 
-let doCopy = String(text => {
-  document.addEventListener("copy", evt => {
-    evt.clipboardData.setData("text", text);
-    evt.preventDefault();
-  }, {
-    capture: true,
-    once: true
-  });
-  document.execCommand("copy");
-});
-
 contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId == "copy-link-text") {
-    let text = info.linkText.replace(/\\/g, "\\\\");
     tabs.executeScript(tab.id, {
-      code: `(${doCopy})("${text}");`
+      code: `copyToClipboard(${JSON.stringify(info.linkText)});`
     }).catch(error => {
-      console.error(error)
+      console.error(error);
       notify("Failed to copy the text.");
     });
   }
