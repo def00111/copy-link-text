@@ -3,7 +3,9 @@
 var strToCopy = "";
 
 function copyToClipboard(text) {
-  if (document.activeElement instanceof HTMLIFrameElement) { // bug with hidden iframe
+  // bug with hidden iframe
+  if ((document.activeElement instanceof HTMLIFrameElement) ||
+      (document.activeElement instanceof HTMLFrameElement)) {
     // need to call it twice :/
     document.activeElement.blur();
     document.activeElement.blur(); // document.activeElement == body
