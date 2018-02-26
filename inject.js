@@ -3,12 +3,12 @@
 var strToCopy = "";
 
 function copyToClipboard(text) {
-  // bug with hidden iframe
+  // does not work inside frame
   if ((document.activeElement instanceof HTMLIFrameElement) ||
       (document.activeElement instanceof HTMLFrameElement)) {
     // need to call it twice :/
     document.activeElement.blur();
-    document.activeElement.blur(); // document.activeElement == body
+    document.activeElement.blur();
   }
   strToCopy = text;
   document.execCommand("copy");
