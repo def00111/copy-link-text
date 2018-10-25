@@ -1,29 +1,24 @@
 "use strict";
-const {contextMenus, i18n, tabs, notifications} = browser;
-
-const _ = i18n.getMessage;
 
 function notify(message) {
-  notifications.create("copy-link-text-notification", {
+  browser.notifications.create("copy-link-text-notification", {
     type: "basic",
     title: "Copy Link Text",
     message
   });
 }
 
-contextMenus.onClicked.addListener((info, tab) => {
+browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId == "copy-link-text") {
-    tabs.executeScript(tab.id, {
-      code: `copyToClipboard(${JSON.stringify(info.linkText)});`
-    }).catch(error => {
-      console.error(error);
-      notify("Failed to copy the text.");
+    let linkText = JSON.stringify(info.linkText).slice(1, -1);
+    navigator.clipboard.writeText(linkText).catch(() => {
+      notify("Failed to copy the link text.");
     });
   }
 });
 
-contextMenus.create({
+browser.menus.create({
   id: "copy-link-text",
-  title: _("contextMenuItemLink"),
+  title: browser.i18n.getMessage("contextMenuItemLink"),
   contexts: ["link"]
 });
