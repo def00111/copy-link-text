@@ -17,24 +17,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
           var text = "";
           var elem = browser.menus.getTargetElement(${info.targetElementId});
           while (elem) {
-            var url = elem.href;
-            if (url) {
-              // Handle SVG links:
-              if (typeof url == "object" && url.animVal) {
-                url = new URL(url.animVal, elem.baseURI).href;
-              }
-            }
-
-            if (!url) {
-              var href = elem.getAttribute("href") ||
-                         elem.getAttributeNS("http://www.w3.org/1999/xlink", "href");
-
-              if (href && /\S/.test(href)) {
-                url = new URL(href, elem.baseURI).href;
-              }
-            }
-
-            if (url && url == "${info.linkUrl}") {
+            if (elem.href ||
+                elem.hasAttribute("href") ||
+                elem.hasAttributeNS("http://www.w3.org/1999/xlink", "href")) {
               if (elem.hasAttribute("title")) {
                 text = elem.getAttribute("title");
               }
