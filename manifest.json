@@ -2,7 +2,7 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "default_locale": "en",
 
   "applications": {

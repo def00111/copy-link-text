@@ -5,7 +5,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  let text = info.linkText;
+  let linkText = info.linkText;
   if (info.modifiers &&
       info.modifiers.length == 1 &&
       info.modifiers[0] == "Shift") {
@@ -14,32 +14,38 @@ browser.menus.onClicked.addListener(async (info, tab) => {
       result = await browser.tabs.executeScript(tab.id, {
         frameId: info.frameId,
         code: `
-          var text = "";
+          var title = "";
           var elem = browser.menus.getTargetElement(${info.targetElementId});
           while (elem) {
             if (elem.href ||
                 elem.hasAttribute("href") ||
                 elem.hasAttributeNS("http://www.w3.org/1999/xlink", "href")) {
               if (elem.hasAttribute("title")) {
-                text = elem.getAttribute("title");
+                title = elem.getAttribute("title");
               }
               break;
             }
             elem = elem.parentElement;
           }
-          text;
+          title;
         `,
       });
     }
     catch(ex) {
+      console.error(ex);
     }
-    if (result && result[0] != "") {
-      text = result[0];
+    if (result &&
+        result[0] != "" &&
+        result[0] != linkText) {
+      linkText = result[0];
     }
   }
 
-  text = JSON.stringify(text).slice(1, -1);
-  navigator.clipboard.writeText(text).catch(() => {
+  linkText = JSON.stringify(linkText)
+                 .replace(/^"|"$/g, "")
+                 .replace(/\\(?=")/g, "");
+
+  navigator.clipboard.writeText(linkText).catch(() => {
     console.error("Failed to copy the link text.");
   });
 });
@@ -47,5 +53,5 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 browser.menus.create({
   id: "copy-link-text",
   title: browser.i18n.getMessage("contextMenuItemLink"),
-  contexts: ["link"]
+  contexts: ["link"],
 });
