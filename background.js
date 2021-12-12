@@ -11,7 +11,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
       info.modifiers[0] == "Shift") {
     let result;
     try {
-      result = await browser.tabs.executeScript(tab.id, {
+      result = (await browser.tabs.executeScript(tab.id, {
         frameId: info.frameId,
         code: `
           var title = "";
@@ -29,21 +29,17 @@ browser.menus.onClicked.addListener(async (info, tab) => {
           }
           title;
         `,
-      });
+      }))[0];
     }
     catch(ex) {
       console.error(ex);
     }
     if (result &&
-        result[0] != "" &&
-        result[0] != linkText) {
-      linkText = result[0];
+        result != "" &&
+        result != linkText) {
+      linkText = result;
     }
   }
-
-  linkText = JSON.stringify(linkText)
-                 .replace(/^"|"$/g, "")
-                 .replace(/\\(?=")/g, "");
 
   navigator.clipboard.writeText(linkText).catch(() => {
     console.error("Failed to copy the link text.");
