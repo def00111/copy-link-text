@@ -20,16 +20,15 @@ browser.menus.onClicked.addListener(async (info, tab) => {
             var title = "";
             var XLINK_NS = "http://www.w3.org/1999/xlink";
             var elem = browser.menus.getTargetElement(${info.targetElementId});
-            while (elem) {
+            for (; elem; elem = elem.parentElement) {
               if (elem.href ||
                   elem.hasAttribute("href") ||
                   elem.hasAttributeNS(XLINK_NS, "href")) {
-                title = elem.title ??
-                        elem.getAttribute("title") ??
-                        elem.getAttributeNS(XLINK_NS, "title") ?? "";
+                title = elem.getAttribute("title") ??
+                        elem.getAttributeNS(XLINK_NS, "title") ??
+                        elem.querySelector("[title]")?.getAttribute("title") ?? "";
                 break;
               }
-              elem = elem.parentElement;
             }
             title;
           `,

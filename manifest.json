@@ -2,13 +2,13 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "default_locale": "en",
 
   "applications": {
     "gecko": {
       "id": "{b144be59-6bdc-41e0-9141-9f8d00373d93}",
-      "strict_min_version": "63.0"
+      "strict_min_version": "74.0"
     }
   },
 
