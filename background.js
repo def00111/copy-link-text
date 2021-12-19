@@ -9,35 +9,40 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   if (info.modifiers &&
       info.modifiers.length == 1 &&
       info.modifiers[0] == "Shift") {
-    let result;
-    try {
-      result = (await browser.tabs.executeScript(tab.id, {
-        frameId: info.frameId,
-        code: `
-          var title = "";
-          var elem = browser.menus.getTargetElement(${info.targetElementId});
-          while (elem) {
-            if (elem.href ||
-                elem.hasAttribute("href") ||
-                elem.hasAttributeNS("http://www.w3.org/1999/xlink", "href")) {
-              if (elem.hasAttribute("title")) {
-                title = elem.getAttribute("title");
+    let response = await browser.permissions.request({origins: ["<all_urls>"]});
+    if (response) {
+      let result;
+      try {
+        result = (await browser.tabs.executeScript(tab.id, {
+          frameId: info.frameId,
+          matchAboutBlank: true,
+          code: `
+            var title = "";
+            var XLINK_NS = "http://www.w3.org/1999/xlink";
+            var elem = browser.menus.getTargetElement(${info.targetElementId});
+            while (elem) {
+              if (elem.href ||
+                  elem.hasAttribute("href") ||
+                  elem.hasAttributeNS(XLINK_NS, "href")) {
+                title = elem.title ??
+                        elem.getAttribute("title") ??
+                        elem.getAttributeNS(XLINK_NS, "title") ?? "";
+                break;
               }
-              break;
+              elem = elem.parentElement;
             }
-            elem = elem.parentElement;
-          }
-          title;
-        `,
-      }))[0];
-    }
-    catch(ex) {
-      console.error(ex);
-    }
-    if (result &&
-        result != "" &&
-        result != linkText) {
-      linkText = result;
+            title;
+          `,
+        }))[0];
+      }
+      catch(ex) {
+        console.error(ex);
+      }
+      if (result &&
+          result != "" &&
+          result != linkText) {
+        linkText = result;
+      }
     }
   }
 

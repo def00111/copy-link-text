@@ -2,7 +2,7 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "default_locale": "en",
 
   "applications": {
@@ -20,7 +20,9 @@
     "96": "icons/96.png"
   },
 
-  "permissions": ["activeTab", "clipboardWrite", "menus"],
+  "permissions": ["clipboardWrite", "menus"],
+
+  "optional_permissions": ["<all_urls>"],
 
   "background": {
     "scripts": ["background.js"]
