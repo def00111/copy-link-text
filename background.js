@@ -6,22 +6,26 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   }
 
   let linkText = info.linkText;
-  if (info.modifiers &&
-      info.modifiers.length == 1 &&
+  if (info.modifiers.length == 1 &&
       info.modifiers[0] == "Shift") {
-    let response = await browser.permissions.request({origins: ["<all_urls>"]});
+    // activeTab doesn't work properly for frames
+    const response = await browser.permissions.request({
+      origins: ["<all_urls>"]
+    });
     if (response) {
-      let result;
       try {
-        result = (await browser.tabs.executeScript(tab.id, {
-          frameId: info.frameId,
-          matchAboutBlank: true,
-          code: `
-            var title = "";
-            var XLINK_NS = "http://www.w3.org/1999/xlink";
-            var elem = browser.menus.getTargetElement(${info.targetElementId});
+        const [{result}] = await browser.scripting.executeScript({
+          target: {
+            tabId: tab.id,
+            frameIds: [info.frameId],
+          },
+          injectImmediately: true,
+          func: targetElementId => {
+            const XLINK_NS = "http://www.w3.org/1999/xlink";
+            let title = "";
+            let elem = browser.menus.getTargetElement(targetElementId);
             for (; elem; elem = elem.parentElement) {
-              if (elem.href ||
+              if ("href" in elem ||
                   elem.hasAttribute("href") ||
                   elem.hasAttributeNS(XLINK_NS, "href")) {
                 title = elem.getAttribute("title") ??
@@ -30,28 +34,28 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 break;
               }
             }
-            title;
-          `,
-        }))[0];
-      }
-      catch(ex) {
+            return title;
+          },
+          args: [info.targetElementId],
+        });
+        if (result) {
+          linkText = result;
+        }
+      } catch(ex) {
         console.error(ex);
-      }
-      if (result &&
-          result != "" &&
-          result != linkText) {
-        linkText = result;
       }
     }
   }
 
-  navigator.clipboard.writeText(linkText).catch(() => {
-    console.error("Failed to copy the link text.");
+  navigator.clipboard.writeText(linkText).catch(error => {
+    console.error("Failed to copy the link text.", error);
   });
 });
 
-browser.menus.create({
-  id: "copy-link-text",
-  title: browser.i18n.getMessage("contextMenuItemLink"),
-  contexts: ["link"],
+browser.runtime.onInstalled.addListener(() => {
+  browser.menus.create({
+    id: "copy-link-text",
+    title: browser.i18n.getMessage("contextMenuItemLink"),
+    contexts: ["link"],
+  });
 });
