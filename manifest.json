@@ -2,7 +2,7 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "default_locale": "en",
 
   "applications": {
@@ -17,7 +17,8 @@
     "32": "icons/32.png",
     "48": "icons/48.png",
     "64": "icons/64.png",
-    "96": "icons/96.png"
+    "96": "icons/96.png",
+    "128": "icons/128.png"
   },
 
   "permissions": ["clipboardWrite", "menus", "scripting"],
