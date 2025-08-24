@@ -52,10 +52,17 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   });
 });
 
-browser.runtime.onInstalled.addListener(() => {
-  browser.menus.create({
-    id: "copy-link-text",
-    title: browser.i18n.getMessage("contextMenuItemLink"),
-    contexts: ["link"],
-  });
+browser.menus.onShown.addListener((info, tab) => {
+  if (!info.contexts.includes("link")) {
+    return;
+  }
+
+  if (!info.menuIds.length) {
+    browser.menus.create({
+      id: "copy-link-text",
+      title: browser.i18n.getMessage("contextMenuItemLink"),
+      contexts: ["link"],
+    },
+    () => browser.menus.refresh());
+  }
 });
