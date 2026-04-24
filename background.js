@@ -1,13 +1,13 @@
 "use strict";
 
 browser.menus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId != "copy-link-text") {
+  if (info.menuItemId !== "copy-link-text") {
     return;
   }
 
   let linkText = info.linkText;
-  if (info.modifiers.length == 1 &&
-      info.modifiers[0] == "Shift") {
+  if (info.modifiers.length === 1 &&
+      info.modifiers[0] === "Shift") {
     // activeTab doesn't work properly for frames
     const response = await browser.permissions.request({
       origins: ["<all_urls>"]
@@ -57,9 +57,10 @@ browser.menus.onShown.addListener((info, tab) => {
     return;
   }
 
-  if (!info.menuIds.length) {
+  const id = "copy-link-text";
+  if (!info.menuIds.includes(id)) {
     browser.menus.create({
-      id: "copy-link-text",
+      id,
       title: browser.i18n.getMessage("contextMenuItemLink"),
       contexts: ["link"],
     },
