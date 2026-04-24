@@ -5,10 +5,13 @@
   "version": "1.6.7",
   "default_locale": "en",
 
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "{b144be59-6bdc-41e0-9141-9f8d00373d93}",
-      "strict_min_version": "106.0"
+      "data_collection_permissions": {
+        "required": ["none"]
+      },
+      "strict_min_version": "140.0"
     }
   },
 
