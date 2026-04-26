@@ -22,19 +22,38 @@ browser.menus.onClicked.addListener(async (info, tab) => {
           injectImmediately: true,
           func: targetElementId => {
             const XLINK_NS = "http://www.w3.org/1999/xlink";
-            let title = "";
+            function findLastTooltip(root) {
+              const iter = document.createNodeIterator(
+                root,
+                NodeFilter.SHOW_ELEMENT
+              );
+
+              const nodes = [root];
+              for (let node = iter.nextNode(); node; node = iter.nextNode()) {
+                nodes.push(node);
+              }
+
+              for (const node of nodes.toReversed()) {
+                if (node.nodeName === "title") {
+                  return node.textContent.trim();
+                } else if (node.hasAttribute("title")) {
+                  return node.getAttribute("title");
+                } else if (node.hasAttributeNS(XLINK_NS, "title")) {
+                  return node.getAttributeNS(XLINK_NS, "title");
+                }
+              }
+              return "";
+            }
+
             let elem = browser.menus.getTargetElement(targetElementId);
             for (; elem; elem = elem.parentElement) {
               if ("href" in elem ||
                   elem.hasAttribute("href") ||
                   elem.hasAttributeNS(XLINK_NS, "href")) {
-                title = elem.getAttribute("title") ??
-                        elem.getAttributeNS(XLINK_NS, "title") ??
-                        elem.querySelector("[title]")?.getAttribute("title") ?? "";
-                break;
+                return findLastTooltip(elem);
               }
             }
-            return title;
+            return "";
           },
           args: [info.targetElementId],
         });
