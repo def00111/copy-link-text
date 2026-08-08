@@ -27,9 +27,25 @@
   "permissions": ["clipboardWrite", "menus", "scripting"],
 
   "optional_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ],
 
   "background": {
     "scripts": ["background.js"],
     "persistent": false
+  },
+
+  "commands": {
+    "copy-last-hovered-link": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+L"
+      },
+      "description": "Copy last hovered link text"
+    }
   }
 }
