@@ -1,4 +1,35 @@
 "use strict";
+const lastHoveredLink = new Map(); // tabId -> {href, linkText}
+
+browser.runtime.onMessage.addListener((message, sender) => {
+  try {
+    if (!sender?.tab) return;
+    const tabId = sender.tab.id;
+    if (message?.type === 'hover') {
+      lastHoveredLink.set(tabId, { href: message.href, linkText: message.linkText });
+    } else if (message?.type === 'getLastHovered') {
+      return Promise.resolve(lastHoveredLink.get(tabId) || null);
+    }
+  } catch (ex) {
+    console.error(ex);
+  }
+  return undefined;
+});
+
+browser.commands.onCommand.addListener(async (command) => {
+  if (command !== 'copy-last-hovered-link') return;
+  try {
+    const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (!activeTab) return;
+    const info = lastHoveredLink.get(activeTab.id);
+    if (!info?.linkText) return;
+    navigator.clipboard.writeText(info.linkText).catch(error => {
+      console.error('Failed to copy the last hovered link text.', error);
+    });
+  } catch (ex) {
+    console.error(ex);
+  }
+});
 
 browser.menus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "copy-link-text") {
