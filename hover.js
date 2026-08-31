@@ -33,7 +33,7 @@
 
   // Expose a quick responder for background queries from the same page
   browser.runtime.onMessage.addListener((message) => {
-    if (message && message.type === 'getLastHovered') {
+    if (message?.type === 'getLastHovered') {
       return Promise.resolve(last);
     }
     return undefined;
