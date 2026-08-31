@@ -1,5 +1,5 @@
 "use strict";
-const lastHovered = new Map(); // tabId -> {href, linkText}
+const lastHoveredLink = new Map(); // tabId -> {href, linkText}
 
 browser.runtime.onMessage.addListener((message, sender) => {
   try {
