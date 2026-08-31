@@ -1,14 +1,14 @@
 "use strict";
-const lastHovered = new Map(); // tabId -> {href, linkText}
+const lastHoveredLink = new Map(); // tabId -> {href, linkText}
 
 browser.runtime.onMessage.addListener((message, sender) => {
   try {
-    if (!sender || !sender.tab) return;
+    if (!sender?.tab) return;
     const tabId = sender.tab.id;
-    if (message && message.type === 'hover') {
-      lastHovered.set(tabId, { href: message.href, linkText: message.linkText });
-    } else if (message && message.type === 'getLastHovered') {
-      return Promise.resolve(lastHovered.get(tabId) || null);
+    if (message?.type === 'hover') {
+      lastHoveredLink.set(tabId, { href: message.href, linkText: message.linkText });
+    } else if (message?.type === 'getLastHovered') {
+      return Promise.resolve(lastHoveredLink.get(tabId) || null);
     }
   } catch (ex) {
     console.error(ex);
@@ -21,7 +21,7 @@ browser.commands.onCommand.addListener(async (command) => {
   try {
     const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
     if (!activeTab) return;
-    const info = lastHovered.get(activeTab.id);
+    const info = lastHoveredLink.get(activeTab.id);
     if (!info || !info.linkText) return;
     navigator.clipboard.writeText(info.linkText).catch(error => {
       console.error('Failed to copy the last hovered link text.', error);
