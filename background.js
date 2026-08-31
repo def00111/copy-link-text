@@ -22,7 +22,7 @@ browser.commands.onCommand.addListener(async (command) => {
     const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
     if (!activeTab) return;
     const info = lastHoveredLink.get(activeTab.id);
-    if (!info || !info.linkText) return;
+    if (!info?.linkText) return;
     navigator.clipboard.writeText(info.linkText).catch(error => {
       console.error('Failed to copy the last hovered link text.', error);
     });
