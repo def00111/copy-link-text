@@ -2,7 +2,7 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "default_locale": "en",
 
   "browser_specific_settings": {
@@ -26,10 +26,27 @@
 
   "permissions": ["clipboardWrite", "menus", "scripting"],
 
-  "optional_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+
+  "commands": {
+    "copy-link-text": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+L"
+      },
+      "description": "Copy the text of the link when using a shortcut key."
+    }
+  },
 
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["bg.js"],
     "persistent": false
   }
 }
