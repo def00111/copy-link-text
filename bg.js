@@ -6,14 +6,24 @@ async function hasAllUrlsPermission() {
   return browser.permissions.contains({origins: [ALL_URLS]});
 }
 
-async function ensureAllUrlsPermission() {
-  if (await hasAllUrlsPermission()) {
-    return true;
-  }
-  // Must be called from within a user input handler (menus.onClicked /
-  // commands.onCommand), which is the case for both call sites below.
-  return browser.permissions.request({origins: [ALL_URLS]});
+const PERMISSION_NOTIFICATION_ID = "copy-link-text-permission-required";
+
+function notifyPermissionRequired() {
+  return browser.notifications.create(PERMISSION_NOTIFICATION_ID, {
+    type: "basic",
+    iconUrl: browser.runtime.getURL("icons/48.png"),
+    title: browser.i18n.getMessage("permissionRequiredNotificationTitle"),
+    message: browser.i18n.getMessage("permissionRequiredNotificationMessage"),
+  });
 }
+
+browser.notifications.onClicked.addListener(notificationId => {
+  if (notificationId !== PERMISSION_NOTIFICATION_ID) {
+    return;
+  }
+  browser.notifications.clear(notificationId);
+  browser.runtime.openOptionsPage();
+});
 
 async function injectLibrary(tabId, target) {
   await browser.scripting.executeScript({
@@ -31,7 +41,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   let linkText = info.linkText;
   if (info.modifiers.length === 1 &&
       info.modifiers[0] === "Shift" &&
-      await ensureAllUrlsPermission()) {
+      await browser.permissions.request({origins: [ALL_URLS]})) {
     try {
       const target = {frameIds: [info.frameId]};
       await injectLibrary(tab.id, target);
@@ -87,7 +97,8 @@ browser.menus.onShown.addListener((info, tab) => {
 browser.commands.onCommand.addListener(async (name, tab) => {
   if (name !== 'copy-link-text') return;
 
-  if (!await ensureAllUrlsPermission()) {
+  if (!await hasAllUrlsPermission()) {
+    notifyPermissionRequired();
     return;
   }
 
