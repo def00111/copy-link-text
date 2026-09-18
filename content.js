@@ -27,7 +27,11 @@
   DocumentFragment.prototype.queryShadowSelector = queryShadowSelector;
   Element.prototype.queryShadowSelector = queryShadowSelector;
 
+  // `configurable: true` because this file is re-injected fresh on every
+  // Shift+click / shortcut invocation, so the property may already exist
+  // in this document from a previous injection.
   Object.defineProperty(Node.prototype, "composedParentElement", {
+    configurable: true,
     get() {
       if (this.parentElement) return this.parentElement;
       const root = this.getRootNode();
@@ -60,6 +64,13 @@
   }
   global.findTitle = findTitle;
 
+  function isLinkElement(el) {
+    return (
+      el.hasAttribute("href") ||
+      el.hasAttributeNS(XLINK_NS, "href")
+    );
+  }
+
   function getLinkText(el) {
     const values = function* () {
       yield gatherTextUnder(el);
@@ -84,6 +95,7 @@
 
     return "";
   }
+  global.getLinkText = getLinkText;
 
   function* composedChildren(node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
@@ -141,35 +153,30 @@
     return text;
   }
 
-  const mouseState = {
-    target: null,
-    x: 0,
-    y: 0
-  };
-
-  const mouseMoveHandler = {
-    handleEvent(event) {
-      mouseState.x = event.x;
-      mouseState.y = event.y;
-      mouseState.target = new WeakRef(event.target);
+  // Finds the <a> currently under the pointer, using the browser's
+  // native :hover state instead of tracking mousemove events -- it's
+  // always accurate for "right now", and :hover also applies to every
+  // ancestor of the truly-hovered element, so a plain descendant (e.g. a
+  // <span> or <img> inside the link) resolves straight to its enclosing
+  // link without a manual ancestor walk.
+  //
+  // A single querySelector() can't see into shadow roots, so when nothing
+  // matches at this level we still need to descend into the shadow root
+  // of whatever is deepest-hovered here and try again.
+  function findHoveredLink(root = document) {
+    const link = root.querySelector("a:hover");
+    if (link && isLinkElement(link)) {
+      return link;
     }
-  };
 
-  document.addEventListener("mousemove", mouseMoveHandler, true);
+    const hovered = root.querySelectorAll(":hover");
+    const shadowRoot = hovered[hovered.length - 1]?.openOrClosedShadowRoot;
+    return shadowRoot ? findHoveredLink(shadowRoot) : null;
+  }
 
-  browser.runtime.onMessage.addListener(message => {
-    if (message?.type === 'getLinkText') {
-      let target = mouseState.target?.deref();
-      let link = findLink(target);
-      if (!link) {
-        const root = target?.openOrClosedShadowRoot ?? document;
-        target = root.elementFromPoint(mouseState.x, mouseState.y);
-        link = findLink(target);
-      }
-      if (link) {
-        return Promise.resolve(getLinkText(link));
-      }
-    }
-    return false;
-  });
+  function getHoveredLinkText() {
+    const link = findHoveredLink();
+    return link ? getLinkText(link) : null;
+  }
+  global.getHoveredLinkText = getHoveredLinkText;
 })(globalThis);
