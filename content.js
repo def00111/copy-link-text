@@ -65,10 +65,7 @@
   global.findTitle = findTitle;
 
   function isLinkElement(el) {
-    return (
-      el.hasAttribute("href") ||
-      el.hasAttributeNS(XLINK_NS, "href")
-    );
+    return ["a", "area"].includes(el.localName);
   }
 
   function getLinkText(el) {
