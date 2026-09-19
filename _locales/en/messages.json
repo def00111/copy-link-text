@@ -1,5 +1,20 @@
 {
   "contextMenuItemLink": {
     "message": "Copy Link T&ext"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "Additional permission required"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "Using the keyboard shortcut to copy link text requires an extra permission. Click this notification to open the extension's settings, then click the button to grant it."
+  },
+  "optionsGrantPermissionButton": {
+    "message": "Grant the permission required for the keyboard shortcut"
+  },
+  "optionsPermissionGranted": {
+    "message": "The permission is granted."
+  },
+  "optionsPermissionNotGranted": {
+    "message": "The permission is not granted yet."
   }
 }

@@ -24,17 +24,13 @@
     "128": "icons/128.png"
   },
 
-  "permissions": ["clipboardWrite", "menus", "scripting"],
+  "permissions": ["clipboardWrite", "menus", "notifications", "scripting"],
 
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_start",
-      "all_frames": true,
-      "match_about_blank": true
-    }
-  ],
+  "optional_permissions": ["<all_urls>"],
+
+  "options_ui": {
+    "page": "options.html"
+  },
 
   "commands": {
     "copy-link-text": {
