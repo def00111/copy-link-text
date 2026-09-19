@@ -164,7 +164,7 @@
   // matches at this level we still need to descend into the shadow root
   // of whatever is deepest-hovered here and try again.
   function findHoveredLink(root = document) {
-    const link = root.querySelector("a:hover");
+    const link = root.querySelector(":is(a, area):hover");
     if (link && isLinkElement(link)) {
       return link;
     }
