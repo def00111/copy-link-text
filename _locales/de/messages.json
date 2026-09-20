@@ -1,5 +1,11 @@
 {
   "contextMenuItemLink": {
     "message": "Link-T&ext kopieren"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "Zusätzliche Berechtigung erforderlich"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "Die Tastenkombination benötigt `<all_urls>`. Öffnen Sie den Add-ons-Manager und erteilen Sie die Berechtigung."
   }
 }

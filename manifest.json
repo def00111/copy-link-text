@@ -2,7 +2,7 @@
   "description": "Copy the text of the link.",
   "manifest_version": 2,
   "name": "Copy Link Text",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "default_locale": "en",
 
   "browser_specific_settings": {
@@ -24,13 +24,9 @@
     "128": "icons/128.png"
   },
 
-  "permissions": ["clipboardWrite", "menus", "notifications", "scripting"],
+  "permissions": ["alarms", "clipboardWrite", "menus", "notifications", "scripting"],
 
   "optional_permissions": ["<all_urls>"],
-
-  "options_ui": {
-    "page": "options.html"
-  },
 
   "commands": {
     "copy-link-text": {

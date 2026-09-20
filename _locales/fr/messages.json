@@ -1,5 +1,11 @@
 {
   "contextMenuItemLink": {
     "message": "Copier le t&exte du lien"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "Autorisation supplémentaire requise"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "Le raccourci clavier nécessite `<all_urls>`. Accordez l’autorisation dans le gestionnaire de modules complémentaires."
   }
 }

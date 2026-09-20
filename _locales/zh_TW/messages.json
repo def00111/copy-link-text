@@ -1,5 +1,11 @@
 {
   "contextMenuItemLink": {
     "message": "複製連結文字(&E)"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "需要額外權限"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "鍵盤快速鍵需要 <all_urls> 權限。開啟附加元件管理員並授予該權限。"
   }
 }

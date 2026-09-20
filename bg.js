@@ -2,28 +2,35 @@
 
 const ALL_URLS = "<all_urls>";
 
-async function hasAllUrlsPermission() {
+function hasAllUrlsPermission() {
   return browser.permissions.contains({origins: [ALL_URLS]});
+}
+
+function requestAllUrlsPermission() {
+  return browser.permissions.request({origins: [ALL_URLS]});
 }
 
 const PERMISSION_NOTIFICATION_ID = "copy-link-text-permission-required";
 
-function notifyPermissionRequired() {
-  return browser.notifications.create(PERMISSION_NOTIFICATION_ID, {
+browser.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "copy-link-text-alarm") {
+    browser.notifications.clear(PERMISSION_NOTIFICATION_ID);
+  }
+});
+
+const _ = browser.i18n.getMessage.bind(browser.i18n);
+
+async function notifyPermissionRequired() {
+  await browser.notifications.create(PERMISSION_NOTIFICATION_ID, {
     type: "basic",
     iconUrl: browser.runtime.getURL("icons/48.png"),
-    title: browser.i18n.getMessage("permissionRequiredNotificationTitle"),
-    message: browser.i18n.getMessage("permissionRequiredNotificationMessage"),
+    title: _("permissionRequiredNotificationTitle"),
+    message: _("permissionRequiredNotificationMessage"),
+  });
+  await browser.alarms.create("copy-link-text-alarm", {
+    delayInMinutes: 0.5
   });
 }
-
-browser.notifications.onClicked.addListener(notificationId => {
-  if (notificationId !== PERMISSION_NOTIFICATION_ID) {
-    return;
-  }
-  browser.notifications.clear(notificationId);
-  browser.runtime.openOptionsPage();
-});
 
 async function injectLibrary(tabId, target) {
   await browser.scripting.executeScript({
@@ -41,24 +48,24 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   let linkText = info.linkText;
   if (info.modifiers.length === 1 &&
       info.modifiers[0] === "Shift" &&
-      await browser.permissions.request({origins: [ALL_URLS]})) {
+      await requestAllUrlsPermission()) {
     try {
       const target = {frameIds: [info.frameId]};
       await injectLibrary(tab.id, target);
       const [{result}] = await browser.scripting.executeScript({
         target: {tabId: tab.id, ...target},
         injectImmediately: true,
-        func: targetElementId => {
+        func: (info) => {
           const res = {};
-          let target = browser.menus.getTargetElement(targetElementId);
-          let link = findLink(target);
+          let target = browser.menus.getTargetElement(info.targetElementId);
+          let link = target.composedClosest("a, area");
           if (link) {
             res.title = findTitle(link);
           }
           res.title ??= "";
           return res;
         },
-        args: [info.targetElementId],
+        args: [info],
       });
       if (result.title) {
         linkText = result.title;
@@ -87,7 +94,7 @@ browser.menus.onShown.addListener((info, tab) => {
   if (!info.menuIds.length) {
     browser.menus.create({
       id: "copy-link-text",
-      title: browser.i18n.getMessage("contextMenuItemLink"),
+      title: _("contextMenuItemLink"),
       contexts: ["link"],
     },
     () => browser.menus.refresh());
@@ -108,7 +115,10 @@ browser.commands.onCommand.addListener(async (name, tab) => {
     const results = await browser.scripting.executeScript({
       target: {tabId: tab.id, ...target},
       injectImmediately: true,
-      func: () => getHoveredLinkText(),
+      func: () => {
+        const link = findHoveredLink();
+        return link ? getLinkText(link) : null;
+      },
     });
     const linkText = results.map(({result}) => result).find(Boolean);
     if (linkText) {

@@ -5,27 +5,20 @@
 
   const nonWhitespace = /\S/;
 
-  function queryShadowSelector(selector) {
-    const element = this.querySelector(selector);
-    if (element) {
-      return element;
-    }
-
-    for (const el of this.querySelectorAll("*")) {
-      const shadowRoot = el.openOrClosedShadowRoot;
-      if (shadowRoot) {
-        const element = shadowRoot.queryShadowSelector(selector);
-        if (element) {
-          return element;
+  Object.defineProperty(Element.prototype, "composedClosest", {
+    value(selectors) {
+      let currentElement = this;
+      while (currentElement) {
+        if (currentElement.matches(selectors)) {
+          return currentElement;
         }
+        currentElement = currentElement.composedParentElement;
       }
-    }
-
-    return null;
-  }
-
-  DocumentFragment.prototype.queryShadowSelector = queryShadowSelector;
-  Element.prototype.queryShadowSelector = queryShadowSelector;
+      return null;
+    },
+    configurable: true,
+    writable: true
+  });
 
   // `configurable: true` because this file is re-injected fresh on every
   // Shift+click / shortcut invocation, so the property may already exist
@@ -39,34 +32,43 @@
     }
   });
 
-  function findLink(el) {
-    for (
-      let currentElement = el;
-      currentElement && document.body !== currentElement;
-      currentElement = currentElement.composedParentElement
-    ) {
-      if (["a", "area"].includes(currentElement.localName)) {
-        return currentElement;
+  function getTitle(el) {
+    if (el.localName === "title") {
+      return el.textContent.trim();
+    }
+
+    return (
+      el.getAttribute("title") ??
+      el.getAttributeNS(XLINK_NS, "title")
+    );
+  }
+
+  function findTitle(root) {
+    if (root.nodeType === Node.ELEMENT_NODE) {
+      const title = getTitle(root);
+      if (title) {
+        return title;
+      }
+    }
+
+    for (const el of root.querySelectorAll("*")) {
+      const title = getTitle(el);
+      if (title) {
+        return title;
+      }
+
+      const shadowRoot = el.openOrClosedShadowRoot;
+      if (shadowRoot) {
+        const title = findTitle(shadowRoot);
+        if (title) {
+          return title;
+        }
       }
     }
 
     return null;
   }
-  global.findLink = findLink;
-
-  function findTitle(el) {
-    if (!el) return null;
-    return (
-      el.getAttribute("title") ||
-      el.localName === "title" && el.textContent ||
-      findTitle(el.queryShadowSelector("[title], title"))
-    );
-  }
   global.findTitle = findTitle;
-
-  function isLinkElement(el) {
-    return ["a", "area"].includes(el.localName);
-  }
 
   function getLinkText(el) {
     const values = function* () {
@@ -74,7 +76,13 @@
       yield findTitle(el);
       yield el.getAttribute("aria-label");
       yield el.getAttribute("alt"); // for the <area> element
-      yield URL.parse(el.href)?.href;
+
+      // Handle SVG links:
+      if (typeof el.href == "object" && el.href.animVal) {
+        yield new URL(el.href.animVal, el.ownerDocument.baseURI).href;
+      } else {
+        yield URL.parse(el.href)?.href;
+      }
 
       const href =
         el.getAttribute("href") ??
@@ -90,7 +98,7 @@
       }
     }
 
-    return "";
+    return null;
   }
   global.getLinkText = getLinkText;
 
@@ -150,7 +158,7 @@
     return text;
   }
 
-  // Finds the <a> currently under the pointer, using the browser's
+  // Finds the <a> or <area> currently under the pointer, using the browser's
   // native :hover state instead of tracking mousemove events -- it's
   // always accurate for "right now", and :hover also applies to every
   // ancestor of the truly-hovered element, so a plain descendant (e.g. a
@@ -162,18 +170,13 @@
   // of whatever is deepest-hovered here and try again.
   function findHoveredLink(root = document) {
     const link = root.querySelector(":is(a, area):hover");
-    if (link && isLinkElement(link)) {
+    if (link) {
       return link;
     }
 
-    const hovered = root.querySelectorAll(":hover");
-    const shadowRoot = hovered[hovered.length - 1]?.openOrClosedShadowRoot;
+    const hovered = root.querySelectorAll(":not(:root):hover");
+    const shadowRoot = Array.prototype.at.call(hovered, -1)?.openOrClosedShadowRoot;
     return shadowRoot ? findHoveredLink(shadowRoot) : null;
   }
-
-  function getHoveredLinkText() {
-    const link = findHoveredLink();
-    return link ? getLinkText(link) : null;
-  }
-  global.getHoveredLinkText = getHoveredLinkText;
+  global.findHoveredLink = findHoveredLink;
 })(globalThis);

@@ -6,15 +6,6 @@
     "message": "追加の権限が必要です"
   },
   "permissionRequiredNotificationMessage": {
-    "message": "キーボードショートカットでリンクのテキストをコピーするには追加の権限が必要です。この通知をクリックすると設定画面が開くので、ボタンをクリックして権限を許可してください。"
-  },
-  "optionsGrantPermissionButton": {
-    "message": "キーボードショートカットの実行に必要な権限を許可する"
-  },
-  "optionsPermissionGranted": {
-    "message": "権限は許可されています。"
-  },
-  "optionsPermissionNotGranted": {
-    "message": "権限はまだ許可されていません。"
+    "message": "キーボードショートカットには <all_urls> の権限が必要です。アドオンマネージャーを開いて、権限を付与してください。"
   }
 }

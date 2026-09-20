@@ -1,5 +1,11 @@
 {
   "contextMenuItemLink": {
     "message": "复制链接文本(&E)"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "需要额外权限"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "键盘快捷键需要 <all_urls> 权限。打开附加组件管理器并授予该权限。"
   }
 }

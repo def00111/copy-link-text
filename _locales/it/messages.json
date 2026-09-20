@@ -1,5 +1,11 @@
 {
   "contextMenuItemLink": {
     "message": "Copia il t&esto del collegamento"
+  },
+  "permissionRequiredNotificationTitle": {
+    "message": "Autorizzazione aggiuntiva richiesta"
+  },
+  "permissionRequiredNotificationMessage": {
+    "message": "La scorciatoia da tastiera richiede <all_urls>. Concedi l’autorizzazione nel gestore dei componenti aggiuntivi."
   }
 }
