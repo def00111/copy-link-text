@@ -1,6 +1,11 @@
 ((global) => {
   "use strict";
 
+  if (typeof global.copyLinkText == "object") {
+    // The script has already been injected.
+    return;
+  }
+
   const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
   const nonWhitespace = /\S/;
@@ -20,9 +25,6 @@
     writable: true
   });
 
-  // `configurable: true` because this file is re-injected fresh on every
-  // Shift+click / shortcut invocation, so the property may already exist
-  // in this document from a previous injection.
   Object.defineProperty(Node.prototype, "composedParentElement", {
     configurable: true,
     get() {
@@ -68,7 +70,6 @@
 
     return null;
   }
-  global.findTitle = findTitle;
 
   function getLinkText(el) {
     const values = function* () {
@@ -100,7 +101,6 @@
 
     return null;
   }
-  global.getLinkText = getLinkText;
 
   function* composedChildren(node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
@@ -178,5 +178,10 @@
     const shadowRoot = Array.prototype.at.call(hovered, -1)?.openOrClosedShadowRoot;
     return shadowRoot ? findHoveredLink(shadowRoot) : null;
   }
-  global.findHoveredLink = findHoveredLink;
+
+  global.copyLinkText = {
+    findHoveredLink,
+    findTitle,
+    getLinkText
+  };
 })(globalThis);

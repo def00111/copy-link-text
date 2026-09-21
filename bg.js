@@ -60,7 +60,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
           let target = browser.menus.getTargetElement(info.targetElementId);
           let link = target.composedClosest("a, area");
           if (link) {
-            res.title = findTitle(link);
+            res.title = copyLinkText.findTitle(link);
           }
           res.title ??= "";
           return res;
@@ -116,8 +116,11 @@ browser.commands.onCommand.addListener(async (name, tab) => {
       target: {tabId: tab.id, ...target},
       injectImmediately: true,
       func: () => {
-        const link = findHoveredLink();
-        return link ? getLinkText(link) : null;
+        const link = copyLinkText.findHoveredLink();
+        if (link) {
+          return copyLinkText.getLinkText(link);
+        }
+        return null;
       },
     });
     const linkText = results.map(({result}) => result).find(Boolean);
